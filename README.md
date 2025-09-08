@@ -8,9 +8,8 @@ Alunos:
 
 Vamos otimizar rotas!
 
-[PDF do Trabalho](https://github.com/danilosmatos/OptiRota/blob/main/Projeto%20de%20Otimiza%C3%A7%C3%A3o%20de%20Rotas%20com%20Estruturas%20de%20Dados-1.pdf)
-
 Links Importantes:
 [pyroutelib3](https://pypi.org/project/pyroutelib3/),
 [OSM](https://www.openstreetmap.org/),
-[Canvas](https://afya.instructure.com/courses/130541/assignments/1106262).
+[Canvas](https://afya.instructure.com/courses/130541/assignments/1106262),
+[PDF do Trabalho](https://github.com/danilosmatos/OptiRota/blob/main/Projeto%20de%20Otimiza%C3%A7%C3%A3o%20de%20Rotas%20com%20Estruturas%20de%20Dados-1.pdf).
