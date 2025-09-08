@@ -8,7 +8,7 @@ Alunos:
 
 Vamos otimizar rotas!
 
-Links Importantes:
+Links Importantes:  
 [pyroutelib3](https://pypi.org/project/pyroutelib3/),
 [OSM](https://www.openstreetmap.org/),
 [Canvas](https://afya.instructure.com/courses/130541/assignments/1106262),
