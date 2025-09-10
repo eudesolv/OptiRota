@@ -14,6 +14,6 @@ Links Importantes:
 | [pyroutelib3](https://pypi.org/project/pyroutelib3/) |
 [OSM](https://www.openstreetmap.org/) |
 [Canvas](https://afya.instructure.com/courses/130541/assignments/1106262) |
-[PDF do Trabalho](https://github.com/danilosmatos/OptiRota/blob/main/Imagens/estrutura_de_dados_rotas.pdf) |  
+[PDF do Trabalho](https://github.com/danilosmatos/OptiRota/blob/main/src/misc/estrutura_de_dados_rotas.pdf) |  
 
-![OSM](https://github.com/danilosmatos/OptiRota/blob/main/Imagens/openstreetmap.jpg)
+![OSM](https://github.com/danilosmatos/OptiRota/blob/main/src/misc/openstreetmap.jpg)
