@@ -1,2 +1,3 @@
+matplotlib
 pyroutelib3
 osmnx
