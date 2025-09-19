@@ -1,33 +1,32 @@
-# a_star.py
-
 import heapq
 import osmnx as ox
-
-class GrafoPersonalizadoAStar:
-    """Estrutura para abstrair o grafo NetworkX, incluindo coordenadas."""
-    def __init__(self, G_ox, weight_type='travel_time'):
+# renomeei os dados e datas todos para data para simplificar
+class Grafo_A_Star_Base:
+    #Adicionei o peso como atributo tmb para deixar fácil de mudar dps
+    def __init__(self, grafo_usado, weight_type='travel_time'):
         self.vizinhos = {}
         self.coordenadas = {} 
         
-        # 1. Armazena as coordenadas (lat, lon)
-        for node, data in G_ox.nodes(data=True):
+        for node, data in grafo_usado.nodes(data=True):
             self.coordenadas[node] = (data['y'], data['x'])
 
-        # 2. Armazena os vizinhos com o peso correto
-        for u, n, data in G_ox.edges(data=True):
+        for u, n, data in grafo_usado.edges(data=True):
+            # Pega agora o atributo do tipo dp peso também
             peso = data.get(weight_type, data.get('length', 1))
             
             if u not in self.vizinhos:
                 self.vizinhos[u] = []
-            
-            self.vizinhos[u].append((n, peso)) # Aresta direcional
+            # A aresta ela é direcional, o que significa que só precisa fazer isso em uma
+            # direção, ao invés de fazer do 'u' para o 'n' e 'n' para o 'u'
+            self.vizinhos[u].append((n, peso))
 
 
 def calcular_heuristica(grafo, no_atual, no_destino):
-    """
-    Heurística (h): Distância Great Circle (Haversine) entre dois nós em metros.
-    Ideal para dados geográficos.
-    """
+    # Existem dois tipos de calculo aqui, euclidiana que você usou e great circle
+    # que é mais usada geograficamente, para fazer a great circle é só usar a função
+    # do próprio módulo do osmnx; Além disso, precisa de Try aqui por que os grafos
+    # podem ser baixados incorretamente, ent ao invés de só explodir o código, ele
+    # continua só que mais fodido por não ter cordenada exata
     try:
         lat1, lon1 = grafo.coordenadas[no_atual]
         lat2, lon2 = grafo.coordenadas[no_destino]
@@ -36,12 +35,10 @@ def calcular_heuristica(grafo, no_atual, no_destino):
     except:
         return 0 # Fallback
 
-def a_star_pathfinder(grafo, inicio, destino):
-    """
-    Executa o algoritmo A* (A-estrela).
-
-    Retorna: (g_score, pais, nos_explorados_contador)
-    """
+def a_star_opi(grafo, inicio, destino):
+    # removi visitados aqui e no dijkstra pq n tem necessidade de passar por esse
+    # processo de ficar duplicando desnecessariamente e tirando a duplicata, basta
+    # checar se o peso for maior e adicionar se não for
     
     pais = {n: None for n in grafo.vizinhos.keys()}
     
@@ -57,9 +54,14 @@ def a_star_pathfinder(grafo, inicio, destino):
     fila_prioridade = []
     heapq.heappush(fila_prioridade, (f_score[inicio], inicio))
     
-    nos_explorados_contador = 0
+    # Como eu provavelmente já avisei, coloquei um contandor para comparar o
+    # Dijktra com o A* com tempo e nós percorridos
+    contador_nos_a = 0
     
     while fila_prioridade:
+        # O python pode desempatar o G e F sozinho, n precisa necessariamente fazer isso
+        # manualmente
+        
         f_atual, no_atual = heapq.heappop(fila_prioridade)
         
         if f_atual > f_score[no_atual]:
@@ -68,9 +70,9 @@ def a_star_pathfinder(grafo, inicio, destino):
         if no_atual == destino:
             break
             
-        nos_explorados_contador += 1 # Conta o nó quando ele é 'explorado'
+        contador_nos_a += 1
         
-        for vizinho, peso in grafo.vizinhos.get(no_atual, []):
+        for vizinho, peso in grafo.vizinhos[no_atual]:
             novo_g_score = g_score[no_atual] + peso
             
             if novo_g_score < g_score[vizinho]:
@@ -84,4 +86,4 @@ def a_star_pathfinder(grafo, inicio, destino):
                 
                 heapq.heappush(fila_prioridade, (novo_f_score, vizinho))
     
-    return g_score, pais, nos_explorados_contador
+    return g_score, pais, contador_nos_a

@@ -1,45 +1,34 @@
-# main.py
-
 import osmnx as ox
 import networkx as nx
 import matplotlib.pyplot as plt
-import time # Para medir o tempo de execução
+import time
 
-# --- Importações das Funções ---
 from algorithms.grafo import grafo_base, grafo_mapear
-from algorithms.dijkstra import GrafoPersonalizado, encontrar_caminho_dijkstra
-from algorithms.a_star import GrafoPersonalizadoAStar, a_star_pathfinder
-# ------------------------------
+from algorithms.dijkstra import Grafo_Dij_Base, dij_Opi
+from algorithms.a_star import Grafo_A_Star_Base, a_star_opi
 
-# --- Configurações Comuns ---
-BAIRRO_TESTE = "Cruz das Almas, Maceió, Alagoas, Brazil"
-# Use 'travel_time' para rotear por tempo (segundos), 'length' para rotear por distância (metros)
-PESO = 'travel_time' 
-COORD_ORIGEM = (-9.6373, -35.7078) # Exemplo de ponto A
-COORD_DESTINO = (-9.6300, -35.7001) # Exemplo de ponto B
+local = "Cruz das Almas, Maceió, Alagoas, Brazil"
+# Aqui pode ser 'lenght' para comparar somente distância e 'travel_time' para comparar tempo
+peso = 'travel_time' 
+origem = (-9.6373, -35.7078)
+destino = (-9.6300, -35.7001)
 
 def reconstruir_caminho(pais, destino, inicio):
-    """
-    Reconstrói a lista de nós do destino até a origem usando o dicionário 'pais'.
-    """
     caminho = []
     atual = destino
     while atual is not None and atual != inicio:
         caminho.append(atual)
         atual = pais.get(atual)
-    
-    # Se o nó inicial for alcançável e a origem estiver correta, adiciona a origem
+
     if atual == inicio:
         caminho.append(inicio)
-        return caminho[::-1] # Inverte para ter [Origem, ..., Destino]
+        return caminho[::-1]
     return None
 
 def main():
-    # 1. Carregar e Preparar o Grafo
-    G_ox, weight_type = grafo_base(place_name=BAIRRO_TESTE, weight_type=PESO)
-    
-    # 2. Encontrar Nós
-    origem_node, destino_node = grafo_mapear(G_ox, COORD_ORIGEM, COORD_DESTINO)
+    grafo, weight_type = grafo_base(place_name=local, weight_type=peso)
+
+    origem_node, destino_node = grafo_mapear(grafo, origem, destino)
     
     if origem_node is None or destino_node is None:
         print("Erro: Nós de origem ou destino não encontrados no grafo.")
@@ -49,12 +38,12 @@ def main():
     print(f"Otimizando pelo peso: '{weight_type}'")
 
     # --- 3. Execução e Medição do Dijkstra ---
-    G_dijkstra = GrafoPersonalizado(G_ox, weight_type=weight_type)
+    G_dijkstra = Grafo_Dij_Base(grafo, weight_type=weight_type)
     
     print("\nExecutando Dijkstra...")
     tempo_inicio_dijkstra = time.time()
     # A função retorna 3 valores: (distâncias totais, pais, contagem de nós)
-    distancias_d, pais_d, nos_d = encontrar_caminho_dijkstra(G_dijkstra, origem_node)
+    distancias_d, pais_d, nos_d = dij_Opi(G_dijkstra, origem_node)
     tempo_fim_dijkstra = time.time()
     
     path_dijkstra = reconstruir_caminho(pais_d, destino_node, origem_node)
@@ -63,12 +52,12 @@ def main():
 
     
     # --- 4. Execução e Medição do A* ---
-    G_astar = GrafoPersonalizadoAStar(G_ox, weight_type=weight_type)
+    G_astar = Grafo_A_Star_Base(grafo, weight_type=weight_type)
 
     print("Executando A*...")
     tempo_inicio_astar = time.time()
     # A função retorna 3 valores: (distâncias totais, pais, contagem de nós)
-    distancias_a, pais_a, nos_a = a_star_pathfinder(G_astar, origem_node, destino_node)
+    distancias_a, pais_a, nos_a = a_star_opi(G_astar, origem_node, destino_node)
     tempo_fim_astar = time.time()
     
     path_a_star = reconstruir_caminho(pais_a, destino_node, origem_node)
@@ -104,11 +93,11 @@ def main():
         # 6. Visualização (Dijkstra vermelho, A* azul)
         print("\nPlotando as rotas (Dijkstra em Vermelho, A* em Azul) para visualização...")
         fig, ax = ox.plot_graph_route(
-            G_ox, path_dijkstra, route_color='r', route_linewidth=5, 
+            grafo, path_dijkstra, route_color='r', route_linewidth=5, 
             route_alpha=0.6, node_size=0, bgcolor='w', show=False, close=False
         )
         fig, ax = ox.plot_graph_route(
-            G_ox, path_a_star, route_color='b', route_linewidth=3, 
+            grafo, path_a_star, route_color='b', route_linewidth=3, 
             route_alpha=1.0, ax=ax, node_size=0, show=True, close=True
         )
     else:
