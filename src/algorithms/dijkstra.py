@@ -1,7 +1,4 @@
-# dijkstra.py
-
 import heapq
-# Não importa osmnx ou matplotlib, pois a classe GrafoPersonalizado já tem os dados
 
 class GrafoPersonalizado:
     """Estrutura simples para converter o grafo NetworkX em uma estrutura de vizinhança

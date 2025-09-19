@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import time # Para medir o tempo de execução
 
 # --- Importações das Funções ---
-from algorithms.grafo import carregar_e_preparar_grafo, encontrar_nos_origem_destino
+from algorithms.grafo import grafo_base, grafo_mapear
 from algorithms.dijkstra import GrafoPersonalizado, encontrar_caminho_dijkstra
 from algorithms.a_star import GrafoPersonalizadoAStar, a_star_pathfinder
 # ------------------------------
@@ -36,10 +36,10 @@ def reconstruir_caminho(pais, destino, inicio):
 
 def main():
     # 1. Carregar e Preparar o Grafo
-    G_ox, weight_type = carregar_e_preparar_grafo(place_name=BAIRRO_TESTE, weight_type=PESO)
+    G_ox, weight_type = grafo_base(place_name=BAIRRO_TESTE, weight_type=PESO)
     
     # 2. Encontrar Nós
-    origem_node, destino_node = encontrar_nos_origem_destino(G_ox, COORD_ORIGEM, COORD_DESTINO)
+    origem_node, destino_node = grafo_mapear(G_ox, COORD_ORIGEM, COORD_DESTINO)
     
     if origem_node is None or destino_node is None:
         print("Erro: Nós de origem ou destino não encontrados no grafo.")
