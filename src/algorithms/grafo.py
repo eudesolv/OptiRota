@@ -1,45 +1,48 @@
-import matplotlib
+# grafo.py
+
 import osmnx as ox
-#bora la galerinha do youtube !!!!!!!
+import networkx as nx
 
-#usando cruz das almas como o bairro teste
-bairro_de_teste = "Cruz das Almas, Maceió, Alagoas, Brazil"
+def carregar_e_preparar_grafo(
+    place_name="Cruz das Almas, Maceió, Alagoas, Brazil", 
+    weight_type="travel_time" # Define o peso primário a ser usado
+):
+    """
+    Carrega o grafo da rede de ruas e o prepara com velocidades e tempos de viagem.
 
-#isso adiciona velocidades diferentes aos tipos diferentes de ruas em um dicionario para usar dps
-velocidades_medias = {
-    'residential': 30,
-    'secondary': 40,
-    'tertiary': 50,
-    'primary': 60,
-    'motorway': 80,
-    'trunk': 80
-}
-#baixa o mapa, especificando com o "drive" para baixar só as ruas que passam carro.
-grafo_teste = ox.graph_from_place(bairro_de_teste, network_type="drive")
-#adiciona o dicionario para ser usado pelo osmnx
-grafo_teste = ox.add_edge_speeds(grafo_teste, hwy_speeds=velocidades_medias)
-#isso automaticamente calcula o tempo de viagem usando a velocidade anterior 
-# e a distância de quando ele baixou o grafo
-grafo_teste = ox.add_edge_travel_times(grafo_teste)
-#
-#   Agora isso aqui é um exemplo de como seria usando a propria função do osmnx
-#       primeiro selecionar a origem e a destinação
-origem = (-9.6373, -35.7078)
-destino = (-9.6300, -35.7001) 
+    Args:
+        place_name (str): O nome do local para buscar o grafo.
+        weight_type (str): O peso que os algoritmos de roteamento devem usar ('length' ou 'travel_time').
 
-origem = ox.distance.nearest_nodes(grafo_teste, X=origem[1], Y=origem[0])
-destino = ox.distance.nearest_nodes(grafo_teste, X=destino[1], Y=destino[0])
+    Returns:
+        tuple: (O grafo pronto, o tipo de peso escolhido)
+    """
+    print(f"Buscando grafo para: {place_name}...")
+    
+    # 1. Baixa o mapa
+    G = ox.graph_from_place(place_name, network_type="drive")
 
-#só abusar do próprio algoritimo deles de encontrar o caminho mais curto, 
-# ele usa dijstra mas n sei se usa A*. Importante colocar o peso como o tempo de viagem
-route = ox.shortest_path(grafo_teste, origem, destino, weight="travel_time")
+    # 2. Define velocidades (para calcular o tempo)
+    velocidades_medias = {
+        'residential': 30, 'secondary': 40, 'tertiary': 50,
+        'primary': 60, 'motorway': 80, 'trunk': 80
+    }
+    G = ox.add_edge_speeds(G, hwy_speeds=velocidades_medias)
+    
+    # 3. Calcula o tempo de viagem (necessário mesmo se usarmos 'length' para que o A* funcione bem)
+    G = ox.add_edge_travel_times(G)
+    
+    print("Grafo carregado e preparado com 'travel_time'.")
+    return G, weight_type
 
-#e depois é só fazer o mapa
-fig, ax = ox.plot_graph_route(grafo_teste, route, node_size=0, show=True)
+def encontrar_nos_origem_destino(G, origem_coords, destino_coords):
+    """Encontra os nós (nodes) mais próximos das coordenadas (lat, lon)."""
+    origem_node = ox.nearest_nodes(G, X=origem_coords[1], Y=origem_coords[0])
+    destino_node = ox.nearest_nodes(G, X=destino_coords[1], Y=destino_coords[0])
+    return origem_node, destino_node
 
-#visualizar a quantidade de nós e arestas e dps visualizar o grafo
-
-#print(f"N° de cruzamentos (Nós): {len(grafo_teste.nodes())}")
-#print(f"N° de ruas (Arestas): {len(grafo_teste.edges())}")
-
-#fig, ax = ox.plot_graph(grafo_teste)
+if __name__ == '__main__':
+    # Teste de carregamento para garantir que a função funciona
+    G, weight = carregar_e_preparar_grafo()
+    if G:
+        print(f"N° de nós: {len(G.nodes())}, N° de arestas: {len(G.edges())}")
