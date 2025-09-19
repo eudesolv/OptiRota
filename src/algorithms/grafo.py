@@ -1,6 +1,6 @@
 import osmnx as ox
 import networkx as nx
-import os # Necessário para checar se o arquivo existe
+import os
 
 def grafo_base(
     # Localização e peso que vai ser usado para medir rotas
@@ -10,17 +10,15 @@ def grafo_base(
     
     print(f"Fazendo grafo para: {place_name}...")
     
-    # Define o nome do arquivo GraphML baseado no local.
-    # Ex: 'Alagoas, Brazil.graphml'
-    filename = place_name.replace(", ", "_").replace(" ", "_") + ".graphml"
+    data_dir = "src/data" 
+    filename_base = place_name.replace(", ", "_").replace(" ", "_") + ".graphml"
+    filepath = os.path.join(data_dir, filename_base)
     
-    # 1. TENTA CARREGAR O GRAFO SALVO
-    if os.path.exists(filename):
+    if os.path.exists(filepath):
         try:
-            print(f"Grafo encontrado em disco ({filename}). Carregando...")
-            G = ox.load_graphml(filename)
-            # Re-calcula tempos/velocidades (caso o arquivo tenha sido salvo sem eles)
-            # ou apenas para garantir que o peso correto está lá
+            print(f"Grafo encontrado em disco ({filepath}). Carregando...")
+            G = ox.load_graphml(filepath)
+            # Re-calcula tempos/velocidades para garantir consistência
             G = ox.add_edge_speeds(G)
             G = ox.add_edge_travel_times(G)
             print("Grafo carregado e preparado a partir do arquivo.")
@@ -47,9 +45,14 @@ def grafo_base(
     # Calcula o tempo de viagem
     G = ox.add_edge_travel_times(G)
     
-    # SALVA O GRAFO para uso futuro (depois do longo download)
-    print(f"Grafo baixado e processado. Salvando em {filename}...")
-    ox.save_graphml(G, filepath=filename)
+    # CRIA O DIRETÓRIO SE NÃO EXISTIR
+    if not os.path.exists(data_dir):
+        # A flag 'exist_ok=True' evita erro caso a pasta já exista
+        os.makedirs(data_dir, exist_ok=True)
+    
+    # SALVA O GRAFO no novo caminho (filepath)
+    print(f"Grafo baixado e processado. Salvando em {filepath}...")
+    ox.save_graphml(G, filepath=filepath)
     
     print(f"Grafo carregado e preparado. Peso primário: '{weight_type}'.")
     return G, weight_type
