@@ -36,18 +36,22 @@ def calcular_heuristica(grafo, no_atual, no_destino):
         return 0 # Fallback
 
 def a_star_opi(grafo, inicio, destino):
+    # CORREÇÃO: Usamos todos os nós a partir das coordenadas, que contém todos
+    todos_os_nos = grafo.coordenadas.keys()
+    
     # removi visitados aqui e no dijkstra pq n tem necessidade de passar por esse
     # processo de ficar duplicando desnecessariamente e tirando a duplicata, basta
     # checar se o peso for maior e adicionar se não for
     
-    pais = {n: None for n in grafo.vizinhos.keys()}
+    # Inicializa com TODOS OS NÓS
+    pais = {n: None for n in todos_os_nos}
     
     # g(n): custo real do início até o nó n
-    g_score = {n: float('inf') for n in grafo.vizinhos.keys()}
+    g_score = {n: float('inf') for n in todos_os_nos}
     g_score[inicio] = 0
     
     # f(n) = g(n) + h(n): custo total estimado
-    f_score = {n: float('inf') for n in grafo.vizinhos.keys()}
+    f_score = {n: float('inf') for n in todos_os_nos}
     f_score[inicio] = calcular_heuristica(grafo, inicio, destino)
     
     # Fila de prioridade: (f_score, nó)
@@ -64,7 +68,8 @@ def a_star_opi(grafo, inicio, destino):
         
         f_atual, no_atual = heapq.heappop(fila_prioridade)
         
-        if f_atual > f_score[no_atual]:
+        # O .get() é importante aqui, pois o destino pode não ter f_score se não for acessível
+        if f_atual > f_score.get(no_atual, float('inf')):
             continue
 
         if no_atual == destino:
@@ -72,9 +77,16 @@ def a_star_opi(grafo, inicio, destino):
             
         contador_nos_a += 1
         
-        for vizinho, peso in grafo.vizinhos[no_atual]:
+        # Usamos .get(no_atual, []) para tratar nós sem arestas de saída
+        for vizinho, peso in grafo.vizinhos.get(no_atual, []):
+            
+            # Proteção contra KeyError, garantindo que o vizinho está nos scores
+            if vizinho not in g_score:
+                 continue
+                 
             novo_g_score = g_score[no_atual] + peso
             
+            # LINHA QUE CAUSOU O ERRO, AGORA PROTEGIDA PELA INICIALIZAÇÃO CORRETA:
             if novo_g_score < g_score[vizinho]:
                 pais[vizinho] = no_atual
                 g_score[vizinho] = novo_g_score

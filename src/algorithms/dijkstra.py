@@ -6,6 +6,7 @@ import heapq
 class Grafo_Dij_Base:
     def __init__(self, G_ox, weight_type='travel_time'):
         self.vizinhos = {}
+        self.todos_os_nos = list(G_ox.nodes()) 
         for u, n, data in G_ox.edges(data=True):
             peso = data.get(weight_type, data.get('length', 1)) 
             
@@ -18,8 +19,8 @@ class Grafo_Dij_Base:
             self.vizinhos[u].append((n, peso))
 
 def dij_Opi(grafo_dij, inicial): 
-    pais = {n: None for n in grafo_dij.vizinhos.keys()}
-    distancia = {n: float('inf') for n in grafo_dij.vizinhos.keys()}
+    pais = {n: None for n in grafo_dij.todos_os_nos}
+    distancia = {n: float('inf') for n in grafo_dij.todos_os_nos}
     distancia[inicial] = 0
 
     filaPrioridade = []

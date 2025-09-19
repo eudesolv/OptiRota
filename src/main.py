@@ -7,28 +7,36 @@ from algorithms.grafo import grafo_base, grafo_mapear
 from algorithms.dijkstra import Grafo_Dij_Base, dij_Opi
 from algorithms.a_star import Grafo_A_Star_Base, a_star_opi
 
-local = "Cruz das Almas, Maceió, Alagoas, Brazil"
-# Aqui pode ser 'lenght' para comparar somente distância e 'travel_time' para comparar tempo
+local = "Alagoas, Brazil"
+# Aqui pode ser 'lenght' para comparar somente distância e 'travel_time' 
+# para comparar tempo
 peso = 'travel_time' 
-origem = (-9.6373, -35.7078)
-destino = (-9.6300, -35.7001)
+# Latitude e longitude é Y, X. Caso contrário vai dar errado que nem tava dando para mim
+# 7615 6660 e 7860 5306
+origem = (-9.6660, -35.7615)
+destino = (-9.5306, -35.7860)
+
+# Pega o dicionario resultado (pais) e faz o caminho de volta do destino para o inicio
+# para pegar o caminho mais curto, basicamente funciona só para checar qual foi exatamente
+# o caminho que o algoritmo fez e ver quais os nós que ele percorreu para formar a rota
 
 def reconstruir_caminho(pais, destino, inicio):
     caminho = []
     atual = destino
-    while atual is not None and atual != inicio:
+    while atual is not None and atual != inicio: # continua enquanto ainda tiver nó e n for o de inicio
         caminho.append(atual)
         atual = pais.get(atual)
 
     if atual == inicio:
         caminho.append(inicio)
+        # inverte pq ele começa do fim e vai pro inicio
         return caminho[::-1]
     return None
 
 def main():
-    grafo, weight_type = grafo_base(place_name=local, weight_type=peso)
+    grafo, weight_type = grafo_base(place_name=local, weight_type=peso) #altera no grafo a loc
 
-    origem_node, destino_node = grafo_mapear(grafo, origem, destino)
+    origem_node, destino_node = grafo_mapear(grafo, origem, destino) #altera a origem e destino
     
     if origem_node is None or destino_node is None:
         print("Erro: Nós de origem ou destino não encontrados no grafo.")
