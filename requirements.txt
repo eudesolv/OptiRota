@@ -2,6 +2,3 @@ matplotlib
 scikit-learn
 pyroutelib3
 osmnx
-heapq
-math
-os
