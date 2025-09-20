@@ -1,45 +1,64 @@
-import matplotlib
 import osmnx as ox
-#bora la galerinha do youtube !!!!!!!
+import networkx as nx
+import os
 
-#usando cruz das almas como o bairro teste
-bairro_de_teste = "Cruz das Almas, Maceió, Alagoas, Brazil"
+def grafo_base(
+    # Localização e peso que vai ser usado para medir rotas
+    place_name="",
+    weight_type=""
+    ):
+    
+    # Para não demorar muito, ele tem sistema de baixar e reusar grafos, primeiro ele procura agora e depois
+    # se não achar baixa para poder usar depois
+    
+    print(f"Procurando grafo para: {place_name}...")
+    print("\n")
+    data_dir = "src/data" 
+    filename_base = place_name.replace(", ", "_").replace(" ", "_") + ".graphml"
+    filepath = os.path.join(data_dir, filename_base)
+    
+    if os.path.exists(filepath):
+        try:
+            print(f"Grafo encontrado no disco em ({filepath})...\n")
+            G = ox.load_graphml(filepath)
+            G = ox.add_edge_speeds(G)
+            G = ox.add_edge_travel_times(G)
+            print("Grafo carregado e preparado a partir do arquivo.")
+            return G, weight_type
+        except Exception as e:
+            print(f"Erro ao carregar o arquivo: {e}. Baixando novamente.")
+            # Se falhar ao carregar, continua para baixar
+            pass 
+    
+    # Aqui que acontece a mágica, se ele não achar no if, ele baixa o grafo
+    print(f"Grafo não encontrado. Baixando e processando para: {place_name}...\n")
+    
+    G = ox.graph_from_place(place_name, network_type="drive")
 
-#isso adiciona velocidades diferentes aos tipos diferentes de ruas em um dicionario para usar dps
-velocidades_medias = {
-    'residential': 30,
-    'secondary': 40,
-    'tertiary': 50,
-    'primary': 60,
-    'motorway': 80,
-    'trunk': 80
-}
-#baixa o mapa, especificando com o "drive" para baixar só as ruas que passam carro.
-grafo_teste = ox.graph_from_place(bairro_de_teste, network_type="drive")
-#adiciona o dicionario para ser usado pelo osmnx
-grafo_teste = ox.add_edge_speeds(grafo_teste, hwy_speeds=velocidades_medias)
-#isso automaticamente calcula o tempo de viagem usando a velocidade anterior 
-# e a distância de quando ele baixou o grafo
-grafo_teste = ox.add_edge_travel_times(grafo_teste)
-#
-#   Agora isso aqui é um exemplo de como seria usando a propria função do osmnx
-#       primeiro selecionar a origem e a destinação
-origem = (-9.6373, -35.7078)
-destino = (-9.6300, -35.7001) 
+    # Muitos lugares baixam sem velocidade médias definidas, então precisa desse fallback
+    velocidades_medias = {
+        'residential': 30, 'secondary': 40, 'tertiary': 50,
+        'primary': 60, 'motorway': 80, 'trunk': 80
+    }
+    # Adiciona as velocidades
+    G = ox.add_edge_speeds(G, hwy_speeds=velocidades_medias)
+    
+    # Calcula o tempo de viagem
+    G = ox.add_edge_travel_times(G)
+    
+    # Verifica se o github baixou a pasta corretamente, frequentemente ele n cria
+    if not os.path.exists(data_dir):
+        # A flag 'exist_ok=True' evita erro caso a pasta já exista
+        os.makedirs(data_dir, exist_ok=True)
+    
+    print(f"Grafo baixado e processado. Salvando em {filepath}...")
+    ox.save_graphml(G, filepath=filepath)
+    
+    print(f"Grafo carregado e preparado. Peso primário: '{weight_type}'.")
+    return G, weight_type
 
-origem = ox.distance.nearest_nodes(grafo_teste, X=origem[1], Y=origem[0])
-destino = ox.distance.nearest_nodes(grafo_teste, X=destino[1], Y=destino[0])
-
-#só abusar do próprio algoritimo deles de encontrar o caminho mais curto, 
-# ele usa dijstra mas n sei se usa A*. Importante colocar o peso como o tempo de viagem
-route = ox.shortest_path(grafo_teste, origem, destino, weight="travel_time")
-
-#e depois é só fazer o mapa
-fig, ax = ox.plot_graph_route(grafo_teste, route, node_size=0, show=True)
-
-#visualizar a quantidade de nós e arestas e dps visualizar o grafo
-
-#print(f"N° de cruzamentos (Nós): {len(grafo_teste.nodes())}")
-#print(f"N° de ruas (Arestas): {len(grafo_teste.edges())}")
-
-#fig, ax = ox.plot_graph(grafo_teste)
+def grafo_mapear(G, coords_origem, coords_destino):
+    # Aqui seta a origem e o destino para fazer o grafo com base nisso
+    node_origem = ox.nearest_nodes(G, X=coords_origem[1], Y=coords_origem[0])
+    node_destino = ox.nearest_nodes(G, X=coords_destino[1], Y=coords_destino[0])
+    return node_origem, node_destino
