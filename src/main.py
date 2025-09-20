@@ -7,14 +7,15 @@ from algorithms.grafo import grafo_base, grafo_mapear
 from algorithms.dijkstra import Grafo_Dij_Base, dij_Opi
 from algorithms.a_star import Grafo_A_Star_Base, a_star_opi
 
-local = "Alagoas, Brazil"
+local = "São Paulo, Brazil"
 # Aqui pode ser 'lenght' para comparar somente distância e 'travel_time' 
 # para comparar tempo
 peso = 'travel_time' 
 # Latitude e longitude é Y, X. Caso contrário vai dar errado que nem tava dando para mim
 # Anotar aqui quais são algumas cordenadas interesantes de se usar
-origem = (-9.2269, -37.7478)
-destino = (-9.0617, -35.8421)
+#SP: -46.6975 -23.7286 V -46.5896 -23.4233
+origem = (-23.955, -46.702)
+destino = (-23.415, -46.755)
 
 # Pega o dicionario resultado (pais) e faz o caminho de volta do destino para o inicio
 # para pegar o caminho mais curto, basicamente funciona só para checar qual foi exatamente
