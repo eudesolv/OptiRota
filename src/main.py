@@ -12,9 +12,9 @@ local = "Alagoas, Brazil"
 # para comparar tempo
 peso = 'travel_time' 
 # Latitude e longitude é Y, X. Caso contrário vai dar errado que nem tava dando para mim
-# 7615 6660 e 7860 5306
-origem = (-9.6660, -35.7615)
-destino = (-9.5306, -35.7860)
+# -37.7478 -9.2269 | -37.3512 -9.2326 | -35.8421 -9.0617=
+origem = (-9.2269, -37.7478)
+destino = (-9.0617, -35.8421)
 
 # Pega o dicionario resultado (pais) e faz o caminho de volta do destino para o inicio
 # para pegar o caminho mais curto, basicamente funciona só para checar qual foi exatamente
@@ -34,16 +34,18 @@ def reconstruir_caminho(pais, destino, inicio):
     return None
 
 def main():
-    grafo, weight_type = grafo_base(place_name=local, weight_type=peso) #altera no grafo a loc
+    print("\n"+"― "*30+"\n")
+    grafo, weight_type = grafo_base(place_name=local, weight_type=peso)
 
-    origem_node, destino_node = grafo_mapear(grafo, origem, destino) #altera a origem e destino
+    origem_node, destino_node = grafo_mapear(grafo, origem, destino)
     
     if origem_node is None or destino_node is None:
         print("Erro: Nós de origem ou destino não encontrados no grafo.")
         return
-
-    print(f"\nOrigem Node: {origem_node}, Destino Node: {destino_node}")
-    print(f"Otimizando pelo peso: '{weight_type}'")
+    
+    # Descomente se der problema nos nodes ou pesoS
+    #print(f"\nOrigem Node: {origem_node}, Destino Node: {destino_node}")
+    #print(f"Otimizando pelo peso: '{weight_type}'")
 
     # --- 3. Execução e Medição do Dijkstra ---
     G_dijkstra = Grafo_Dij_Base(grafo, weight_type=weight_type)
@@ -55,7 +57,6 @@ def main():
     tempo_fim_dijkstra = time.time()
     
     path_dijkstra = reconstruir_caminho(pais_d, destino_node, origem_node)
-    custo_dijkstra = distancias_d.get(destino_node, float('inf'))
     tempo_total_dijkstra = tempo_fim_dijkstra - tempo_inicio_dijkstra
 
     
@@ -69,7 +70,6 @@ def main():
     tempo_fim_astar = time.time()
     
     path_a_star = reconstruir_caminho(pais_a, destino_node, origem_node)
-    custo_astar = distancias_a.get(destino_node, float('inf'))
     tempo_total_astar = tempo_fim_astar - tempo_inicio_astar
     
 
@@ -78,38 +78,31 @@ def main():
     if path_dijkstra and path_a_star:
         
         # Unidade do custo
-        custo_unit = 'segundos' if weight_type == 'travel_time' else 'metros'
         
-        print("\n" + "="*40)
-        print("   COMPARAÇÃO DE CUSTO E EFICIÊNCIA")
-        print("="*40)
-        
-        # Confirmação de Custo (devem ser iguais)
-        print("\n[Custo da Rota Encontrada]")
-        print(f"Custo (Dijkstra): {custo_dijkstra:.2f} {custo_unit}")
-        print(f"Custo (A*):       {custo_astar:.2f} {custo_unit}")
+        print("\n" + "="*35)
+        print("   COMPARAÇÃO DE COMPLEXIDADE")
+        print("="*35)
 
         # Comparação de Desempenho
-        print("\n[Métricas de Eficiência]")
-        print("-" * 40)
-        print(f"{'Algoritmo':<10} | {'Tempo (s)':>15} | {'Nós Explorados':>15}")
-        print("-" * 40)
-        print(f"{'Dijkstra':<10} | {tempo_total_dijkstra:15.6f} | {nos_d:15}")
-        print(f"{'A*':<10} | {tempo_total_astar:15.6f} | {nos_a:15}")
-        print("-" * 40)
+        print("\n[Métricas]")
+        print("-" * 60)
+        print(f"{'Algoritmo':<10} | {'Tempo (ms)':>15} | {'Nós Explorados':>15}")
+        print("-" * 60)
+        print(f"{'Dijkstra':<10} | {tempo_total_dijkstra*1000:15.3f} | {nos_d:15}")
+        print(f"{'A*':<10} | {tempo_total_astar*1000:15.3f} | {nos_a:15}")
+        print("-" * 60)
         
-        # 6. Visualização (Dijkstra vermelho, A* azul)
-        print("\nPlotando as rotas (Dijkstra em Vermelho, A* em Azul) para visualização...")
+        
+        # Desenha a linha usando o A*; Da no msm pq os dois vão chegar no mesmo resultado
+        print("\nDesenhando a rota desejada...")
+        print("\n"+"― "*30+"\n")
         fig, ax = ox.plot_graph_route(
-            grafo, path_dijkstra, route_color='r', route_linewidth=5, 
-            route_alpha=0.6, node_size=0, bgcolor='w', show=False, close=False
-        )
-        fig, ax = ox.plot_graph_route(
-            grafo, path_a_star, route_color='b', route_linewidth=3, 
-            route_alpha=1.0, ax=ax, node_size=0, show=True, close=True
+            grafo, path_a_star,route_color='r', route_linewidth=3, route_alpha=1.0, 
+            node_size=0, bgcolor='w', show=True, close=True
         )
     else:
-        print("Caminho não encontrado pelo Dijkstra e/ou A*. Verifique as coordenadas e a conectividade do grafo.")
+        print("Caminho não encontrado pelo A*. Verifique as coordenadas.")
+        print("\n"+"― "*30+"\n")
 
 
 if __name__ == '__main__':

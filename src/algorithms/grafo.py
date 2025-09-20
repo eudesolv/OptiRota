@@ -4,21 +4,19 @@ import os
 
 def grafo_base(
     # Localização e peso que vai ser usado para medir rotas
-    place_name="Cruz das Almas, Maceió, Alagoas, Brazil",
-    weight_type="travel_time"
+    place_name="",
+    weight_type=""
     ):
-    
-    print(f"Fazendo grafo para: {place_name}...")
-    
+    print(f"Procurando grafo para: {place_name}...")
+    print("\n")
     data_dir = "src/data" 
     filename_base = place_name.replace(", ", "_").replace(" ", "_") + ".graphml"
     filepath = os.path.join(data_dir, filename_base)
     
     if os.path.exists(filepath):
         try:
-            print(f"Grafo encontrado em disco ({filepath}). Carregando...")
+            print(f"Grafo encontrado no disco em ({filepath})...\n")
             G = ox.load_graphml(filepath)
-            # Re-calcula tempos/velocidades para garantir consistência
             G = ox.add_edge_speeds(G)
             G = ox.add_edge_travel_times(G)
             print("Grafo carregado e preparado a partir do arquivo.")
@@ -29,7 +27,7 @@ def grafo_base(
             pass 
     
     # 2. SE NÃO EXISTIR OU FALHAR, BAIXA E SALVA
-    print(f"Grafo não encontrado. Baixando e processando para: {place_name}...")
+    print(f"Grafo não encontrado. Baixando e processando para: {place_name}...\n")
     
     # Baixa o grafico baseado no que foi dito na função base
     G = ox.graph_from_place(place_name, network_type="drive")

@@ -1,5 +1,6 @@
 import heapq
 import osmnx as ox
+import math
 # renomeei os dados e datas todos para data para simplificar
 class Grafo_A_Star_Base:
     #Adicionei o peso como atributo tmb para deixar fácil de mudar dps
@@ -22,16 +23,15 @@ class Grafo_A_Star_Base:
 
 
 def calcular_heuristica(grafo, no_atual, no_destino):
-    # Existem dois tipos de calculo aqui, euclidiana que você usou e great circle
-    # que é mais usada geograficamente, para fazer a great circle é só usar a função
-    # do próprio módulo do osmnx; Além disso, precisa de Try aqui por que os grafos
-    # podem ser baixados incorretamente, ent ao invés de só explodir o código, ele
-    # continua só que mais fodido por não ter cordenada exata
+
     try:
         lat1, lon1 = grafo.coordenadas[no_atual]
         lat2, lon2 = grafo.coordenadas[no_destino]
-        # Usa a função otimizada do OSMnx
-        return ox.distance.great_circle_vec(lat1, lon1, lat2, lon2)
+
+        lat_diff = (lat2 - lat1) * 111000
+        lon_diff = (lon2 - lon1) * 111000 * math.cos(math.radians(lat1))
+        
+        return math.sqrt(lat_diff**2 + lon_diff**2)
     except:
         return 0 # Fallback
 
