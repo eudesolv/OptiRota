@@ -7,6 +7,10 @@ def grafo_base(
     place_name="",
     weight_type=""
     ):
+    
+    # Para não demorar muito, ele tem sistema de baixar e reusar grafos, primeiro ele procura agora e depois
+    # se não achar baixa para poder usar depois
+    
     print(f"Procurando grafo para: {place_name}...")
     print("\n")
     data_dir = "src/data" 
@@ -26,13 +30,12 @@ def grafo_base(
             # Se falhar ao carregar, continua para baixar
             pass 
     
-    # 2. SE NÃO EXISTIR OU FALHAR, BAIXA E SALVA
+    # Aqui que acontece a mágica, se ele não achar no if, ele baixa o grafo
     print(f"Grafo não encontrado. Baixando e processando para: {place_name}...\n")
     
-    # Baixa o grafico baseado no que foi dito na função base
     G = ox.graph_from_place(place_name, network_type="drive")
 
-    # Define as velocidades médias (o restante do seu código)
+    # Muitos lugares baixam sem velocidade médias definidas, então precisa desse fallback
     velocidades_medias = {
         'residential': 30, 'secondary': 40, 'tertiary': 50,
         'primary': 60, 'motorway': 80, 'trunk': 80
@@ -43,12 +46,11 @@ def grafo_base(
     # Calcula o tempo de viagem
     G = ox.add_edge_travel_times(G)
     
-    # CRIA O DIRETÓRIO SE NÃO EXISTIR
+    # Verifica se o github baixou a pasta corretamente, frequentemente ele n cria
     if not os.path.exists(data_dir):
         # A flag 'exist_ok=True' evita erro caso a pasta já exista
         os.makedirs(data_dir, exist_ok=True)
     
-    # SALVA O GRAFO no novo caminho (filepath)
     print(f"Grafo baixado e processado. Salvando em {filepath}...")
     ox.save_graphml(G, filepath=filepath)
     
@@ -60,9 +62,3 @@ def grafo_mapear(G, coords_origem, coords_destino):
     node_origem = ox.nearest_nodes(G, X=coords_origem[1], Y=coords_origem[0])
     node_destino = ox.nearest_nodes(G, X=coords_destino[1], Y=coords_destino[0])
     return node_origem, node_destino
-
-if __name__ == '__main__':
-    # Teste para ver se funciona e número de nós e arestas
-    G, weight = grafo_base(place_name="Maceió, Alagoas, Brazil") # Exemplo de como testar
-    if G:
-        print(f"N° de nós: {len(G.nodes())}, N° de arestas: {len(G.edges())}")

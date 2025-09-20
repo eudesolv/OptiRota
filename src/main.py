@@ -12,7 +12,7 @@ local = "Alagoas, Brazil"
 # para comparar tempo
 peso = 'travel_time' 
 # Latitude e longitude é Y, X. Caso contrário vai dar errado que nem tava dando para mim
-# -37.7478 -9.2269 | -37.3512 -9.2326 | -35.8421 -9.0617=
+# Anotar aqui quais são algumas cordenadas interesantes de se usar
 origem = (-9.2269, -37.7478)
 destino = (-9.0617, -35.8421)
 
@@ -46,38 +46,31 @@ def main():
     # Descomente se der problema nos nodes ou pesoS
     #print(f"\nOrigem Node: {origem_node}, Destino Node: {destino_node}")
     #print(f"Otimizando pelo peso: '{weight_type}'")
-
-    # --- 3. Execução e Medição do Dijkstra ---
+    
+    # DIJKSTRA --------------------------------------------------------------
     G_dijkstra = Grafo_Dij_Base(grafo, weight_type=weight_type)
     
     print("\nExecutando Dijkstra...")
     tempo_inicio_dijkstra = time.time()
-    # A função retorna 3 valores: (distâncias totais, pais, contagem de nós)
     distancias_d, pais_d, nos_d = dij_Opi(G_dijkstra, origem_node)
     tempo_fim_dijkstra = time.time()
     
     path_dijkstra = reconstruir_caminho(pais_d, destino_node, origem_node)
     tempo_total_dijkstra = tempo_fim_dijkstra - tempo_inicio_dijkstra
 
-    
-    # --- 4. Execução e Medição do A* ---
+    # A* -------------------------------------------------------------------
     G_astar = Grafo_A_Star_Base(grafo, weight_type=weight_type)
 
     print("Executando A*...")
     tempo_inicio_astar = time.time()
-    # A função retorna 3 valores: (distâncias totais, pais, contagem de nós)
     distancias_a, pais_a, nos_a = a_star_opi(G_astar, origem_node, destino_node)
     tempo_fim_astar = time.time()
     
     path_a_star = reconstruir_caminho(pais_a, destino_node, origem_node)
     tempo_total_astar = tempo_fim_astar - tempo_inicio_astar
     
-
-    # --- 5. Análise e Comparação de Desempenho ---
     
     if path_dijkstra and path_a_star:
-        
-        # Unidade do custo
         
         print("\n" + "="*35)
         print("   COMPARAÇÃO DE COMPLEXIDADE")
