@@ -1,6 +1,7 @@
 import osmnx as ox
 import networkx as nx
 import os
+import matplotlib.pyplot as plt
 
 def grafo_base(
     # Localização e peso que vai ser usado para medir rotas
@@ -64,9 +65,31 @@ def grafo_mapear(G, coords_origem, coords_destino):
     return node_origem, node_destino
 
 def main():
-    loc = ""
+    loc = "Aracaju, Sergipe, Brasil"
     peso = "travel_time"
 
-    grafo_base()
+    print(f"Tentando obter o grafo para: {loc}")
+    grafo, z = grafo_base(place_name=loc, weight_type=peso)
+
+    if grafo:
+        print(f"Número de Interseções: {grafo.number_of_nodes()}")
+        print(f"Número de Ruas: {grafo.number_of_edges()}")
+        
+        fig, ax = ox.plot_graph(
+        grafo,
+        filepath=None,
+        node_size=0,
+        edge_color="gray",
+        bgcolor="w",
+        save=False,
+        show=False,
+        close=False)
+        plt.show()
+        
+    else:
+        print("FALHA: O local provavelmente foi colocado incorretamente.")
+
+
+
 if __name__ == '__main__':
     main()  
