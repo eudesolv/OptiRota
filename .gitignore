@@ -1,0 +1,6 @@
+.venv/
+.cache/
+src/data/*.graphml
+!src/data/Alagoas_Brazil.graphml
+!src/data/Maceió_Alagoas_Brazil.graphml
+!src/data/São_Paulo_Brazil.graphml
