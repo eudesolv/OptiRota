@@ -62,3 +62,11 @@ def grafo_mapear(G, coords_origem, coords_destino):
     node_origem = ox.nearest_nodes(G, X=coords_origem[1], Y=coords_origem[0])
     node_destino = ox.nearest_nodes(G, X=coords_destino[1], Y=coords_destino[0])
     return node_origem, node_destino
+
+def main():
+    loc = ""
+    peso = "travel_time"
+
+    grafo_base()
+if __name__ == '__main__':
+    main()  
